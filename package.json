@@ -16,7 +16,6 @@
     "canvas": "^2.10.2",
     "discord.js": "^14.15.3",
     "dotenv": "^16.0.3",
-    "easypanel-sdk": "^0.3.1",
     "mongoose": "^8.5.1"
   },
   "devDependencies": {
