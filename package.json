@@ -1,0 +1,28 @@
+{
+  "name": "level-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "bun index.js",
+    "dev": "bun index.js --watch"
+  },
+  "author": "DeveloperJosh",
+  "license": "ISC",
+  "dependencies": {
+    "ascii-table": "^0.0.9",
+    "axios": "^1.7.2",
+    "canvas": "^2.10.2",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.0.3",
+    "easypanel-sdk": "^0.3.1",
+    "mongoose": "^8.5.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
