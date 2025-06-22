@@ -33,7 +33,6 @@ module.exports = {
 			}
 		}
 
-		// Try to execute the command
 		try {
 			await command.execute(interaction);
 		} catch (error) {

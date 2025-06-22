@@ -1,29 +1,41 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
-const getAllCommands = require('../structure/commandRegistry').getAllCommands;
+const {
+	SlashCommandBuilder,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder
+} = require('discord.js');
+const getAllCommands = require('../../structure/commandRegistry').getAllCommands;
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('help')
-		.setDescription('List all available commands with descriptions.'),
+		.setDescription('List all available commands grouped by category.'),
 
 	async execute(interaction) {
 		const commands = getAllCommands();
-		const perPage = 5;
+
+		const categories = {};
+		for (const cmd of commands) {
+			if (!categories[cmd.category]) categories[cmd.category] = [];
+			categories[cmd.category].push(cmd);
+		}
+
+		const categoryNames = Object.keys(categories);
 		let page = 0;
 
 		const generateEmbed = (page) => {
-			const start = page * perPage;
-			const end = start + perPage;
-			const current = commands.slice(start, end);
+			const category = categoryNames[page];
+			const cmds = categories[category];
 
 			const embed = new EmbedBuilder()
-				.setTitle('📖 Help Menu')
+				.setTitle(`📖 Help Menu - ${category.charAt(0).toUpperCase() + category.slice(1)}`)
 				.setColor('#0099ff')
-				.setFooter({ text: `Page ${page + 1} of ${Math.ceil(commands.length / perPage)}` });
+				.setFooter({ text: `Category ${page + 1} of ${categoryNames.length}` });
 
-			current.forEach(cmd => {
+			for (const cmd of cmds) {
 				embed.addFields({ name: `/${cmd.name}`, value: cmd.description });
-			});
+			}
 
 			return embed;
 		};
@@ -38,7 +50,7 @@ module.exports = {
 				.setCustomId('next')
 				.setLabel('Next ➡️')
 				.setStyle(ButtonStyle.Secondary)
-				.setDisabled(commands.length <= perPage)
+				.setDisabled(categoryNames.length <= 1)
 		);
 
 		await interaction.reply({
@@ -48,9 +60,7 @@ module.exports = {
 		});
 
 		const message = await interaction.fetchReply();
-		const collector = message.createMessageComponentCollector({
-			time: 60_000
-		});
+		const collector = message.createMessageComponentCollector({ time: 60_000 });
 
 		collector.on('collect', async i => {
 			if (i.user.id !== interaction.user.id) {
@@ -62,7 +72,7 @@ module.exports = {
 			else if (i.customId === 'prev') page--;
 
 			row.components[0].setDisabled(page === 0);
-			row.components[1].setDisabled((page + 1) * perPage >= commands.length);
+			row.components[1].setDisabled(page + 1 >= categoryNames.length);
 
 			await i.update({
 				embeds: [generateEmbed(page)],
