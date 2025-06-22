@@ -11,12 +11,14 @@
   "author": "DeveloperJosh",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/voice": "^0.18.0",
     "ascii-table": "^0.0.9",
     "axios": "^1.7.2",
     "canvas": "^2.10.2",
     "discord.js": "^14.15.3",
     "dotenv": "^16.0.3",
-    "mongoose": "^8.5.1"
+    "mongoose": "^8.5.1",
+    "play-dl": "^1.9.7"
   },
   "devDependencies": {
     "@types/bun": "latest"
