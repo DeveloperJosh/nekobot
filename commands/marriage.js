@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-const marriageFile = path.join(__dirname, '..', 'marriages.json');
+const marriageFile = path.join(__dirname, '..', 'data', 'marriages.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
