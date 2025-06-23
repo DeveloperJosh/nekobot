@@ -7,6 +7,6 @@ module.exports = {
 	once: true,
 	execute(client) {
 		console.log(`Logged in as ${client.user.tag}`);
-		client.user.setActivity('KitKat eat ice cream', { type: ActivityType.Watching });
+		client.user.setActivity('Someone pee', { type: ActivityType.Watching });
 	},
 };

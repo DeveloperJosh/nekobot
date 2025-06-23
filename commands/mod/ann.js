@@ -34,7 +34,7 @@ module.exports = {
         const withButtons = interaction.options.getBoolean('with_buttons') ?? false;
 
         const embed = new EmbedBuilder()
-            .setTitle('📢 Game Night Announcement')
+            .setTitle('📢 Announcement')
             .setDescription(message)
             .setColor(0x5865F2)
             .setTimestamp()
@@ -49,7 +49,7 @@ module.exports = {
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId('vote_overwatch').setLabel('Overwatch').setStyle(ButtonStyle.Primary),
             new ButtonBuilder().setCustomId('vote_mr').setLabel('Marvel Rivals').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId('vote_poker').setLabel('Poker Night').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId('vote_fn').setLabel('Fortnite').setStyle(ButtonStyle.Danger),
         );
 
         await interaction.reply({ content: '✅ Announcement sent with voting buttons!', ephemeral: true });
@@ -88,7 +88,7 @@ module.exports = {
                     `✅ Voting has ended!\n\n` +
                     `**Overwatch**: ${voteCounts.overwatch} votes\n` +
                     `**Marvel Rivals**: ${voteCounts.mr} votes\n` +
-                    `**Poker Night**: ${voteCounts.poker} votes`
+                    `**Fortnite**: ${voteCounts.poker} votes`
                 )
                 .setTimestamp();
 
@@ -103,7 +103,6 @@ module.exports = {
             votes.forEach((vote, userId) => {
                 const user = interaction.guild.members.cache.get(userId);
                 const tag = user?.user?.tag ?? `Unknown (${userId})`;
-                console.log(`${tag} voted for ${vote}`);
             });
 
             const logChannel = interaction.guild.channels.cache.find(ch => ch.name === 'vote-logs');

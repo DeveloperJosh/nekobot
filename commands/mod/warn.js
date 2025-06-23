@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const UserData = path.join(__dirname, '..', 'data', 'user.json');
+const UserData = path.join(__dirname, '../..', 'data', 'user.json');
 
 module.exports = {
     data: new SlashCommandBuilder()

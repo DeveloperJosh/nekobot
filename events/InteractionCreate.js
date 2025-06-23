@@ -8,7 +8,7 @@ module.exports = {
 		const command = interaction.client.commands.get(interaction.commandName);
 		const comman_channel = "1380591686798934106";
 		const debug = false;
-		const devs = ['321750582912221184'];
+		const devs = ['321750582912221184', '1347919466494820417', '322925171507724298'];
 
 		if (!command) {
 			console.error(`No command matching ${interaction.commandName} was found.`);
@@ -23,14 +23,12 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.user.id !== '321750582912221184') {
-			if (interaction.channel.id !== comman_channel) {
-				await interaction.reply({
-					content: `⚠️ This command can only be used in <#${comman_channel}>.`,
-					ephemeral: true,
-				});
-				return;
-			}
+		if (!devs.includes(interaction.user.id) && interaction.channel.id !== comman_channel) {
+			await interaction.reply({
+				content: `⚠️ This command can only be used in <#${comman_channel}>.`,
+				ephemeral: true,
+			});
+			return;
 		}
 
 		try {

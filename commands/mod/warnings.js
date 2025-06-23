@@ -1,7 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const UserData = path.join(__dirname, '..', 'data', 'user.json');
+const UserData = path.join(__dirname, '../..', 'data', 'user.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -14,6 +14,11 @@ module.exports = {
 
     async execute(interaction) {
         const target = interaction.options.getUser('target');
+
+        // Permission check
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
+            return interaction.reply({ content: '❌ You do not have permission to view warnings.', ephemeral: true });
+        }
 
         let data = {};
         if (fs.existsSync(UserData)) {

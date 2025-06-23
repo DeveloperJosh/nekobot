@@ -57,5 +57,5 @@ for (const file of eventFiles) {
 	}
 }
 
-require('./req.js');
 client.login(token);
+require('./req.js');

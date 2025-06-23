@@ -19,7 +19,7 @@ module.exports = {
                 .setDescription('Reason for timeout')
                 .setRequired(false)),
     async execute(interaction) {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {
             return interaction.reply({ content: '❌ You do not have permission to timeout members.', ephemeral: true });
         }
 
