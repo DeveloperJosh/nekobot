@@ -1,4 +1,4 @@
-# level-bot
+# some-bot
 
 To install dependencies:
 
