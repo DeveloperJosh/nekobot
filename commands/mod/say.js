@@ -1,25 +1,24 @@
-// say command
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('say')
-        .setDescription('Make the bot say something')
+        .setDescription('Make the bot say something anonymously')
         .addStringOption(option =>
             option.setName('message')
                 .setDescription('The message to say')
                 .setRequired(true)),
     async execute(interaction) {
-
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            return interaction.reply({ content: '❌ You do not have permission to kick members.', ephemeral: true });
+            return interaction.reply({ content: '❌ You do not have permission to use this command.', ephemeral: true });
         }
 
         const message = interaction.options.getString('message');
+        
+        await interaction.deferReply({ ephemeral: true });
 
-        if (!message) {
-            return interaction.reply({ content: '❌ Please provide a message to say.', ephemeral: true });
-        }
+        await interaction.channel.send(message);
 
-        await interaction.reply({ content: message, ephemeral: false });
+        await interaction.deleteReply();
     },
 };
