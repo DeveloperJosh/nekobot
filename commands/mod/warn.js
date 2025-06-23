@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
-const UserData = path.join(__dirname, '../..', 'data', 'user.json');
+const { addWarning } = require('../../structure/userData');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -26,9 +24,11 @@ module.exports = {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
             return interaction.reply({ content: '❌ You do not have permission to warn members.', ephemeral: true });
         }
+
         if (target.id === issuer.id) {
             return interaction.reply({ content: '❌ You cannot warn yourself.', ephemeral: true });
         }
+
         if (target.bot) {
             return interaction.reply({ content: '❌ You cannot warn bots.', ephemeral: true });
         }
@@ -39,37 +39,20 @@ module.exports = {
         }
 
         const timestamp = Math.floor(Date.now() / 1000);
-
-        // Create the warning object
         const warning = {
             reason,
             issuedBy: issuer.id,
             timestamp
         };
 
-        // Save the warning
-        let userData = {};
         try {
-            if (fs.existsSync(UserData)) {
-                userData = JSON.parse(fs.readFileSync(UserData, 'utf8'));
-            }
-        } catch (err) {
-            console.warn('⚠️ Failed to load user data. Starting fresh.');
-        }
-
-        if (!userData[target.id]) {
-            userData[target.id] = { warnings: [] };
-        }
-        userData[target.id].warnings.push(warning);
-
-        try {
-            fs.writeFileSync(UserData, JSON.stringify(userData, null, 2), 'utf8');
+            addWarning(target.id, warning);
         } catch (err) {
             console.error('❌ Failed to save warning data:', err);
-            return interaction.reply({ content: '⚠️ Warning failed to save to file.', ephemeral: true });
+            return interaction.reply({ content: '⚠️ Warning failed to save.', ephemeral: true });
         }
 
-        // Prepare the embed
+        // Embed to send in DMs
         const warningEmbed = new EmbedBuilder()
             .setColor('Yellow')
             .setTitle('⚠️ You have been warned')
@@ -81,28 +64,27 @@ module.exports = {
             .setFooter({ text: 'Warning System' })
             .setTimestamp();
 
-        // Try to DM the user
         let dmSuccess = true;
         try {
             await target.send({ embeds: [warningEmbed] });
         } catch (err) {
             dmSuccess = false;
-            console.error(`❌ Failed to DM ${target.tag}:`, err);
+            console.warn(`❌ Could not DM ${target.tag}:`, err);
         }
 
-        // Respond to interaction
         const publicNotice = `⚠️ <@${target.id}> has been warned for: *${reason}* at <t:${timestamp}:f>`;
+
         if (!dmSuccess) {
             await interaction.channel.send({ content: publicNotice });
             return interaction.reply({
                 content: '✅ Warning logged, but the user has DMs disabled.',
                 ephemeral: true
             });
-        } else {
-            return interaction.reply({
-                content: `✅ Successfully warned **${target.tag}** and sent them a DM.`,
-                ephemeral: true
-            });
         }
+
+        return interaction.reply({
+            content: `✅ Successfully warned **${target.tag}** and sent them a DM.`,
+            ephemeral: true
+        });
     }
 };
