@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getUser, saveUser } = require('../../structure/userData');
 
 const COOLDOWN_KEY = 'fish';
-const BASE_COOLDOWN = 30000; // 30 seconds base cooldown
+const BASE_COOLDOWN = 30000;
 
 const BASE_OUTCOMES = [
     // Junk items (value 0-10)
@@ -11,18 +11,18 @@ const BASE_OUTCOMES = [
     { text: 'soggy newspaper 📰', value: 5, baseChance: 10 },
     { text: 'rusty can 🥫', value: 2, baseChance: 8 },
     { text: 'used condom', value: 1, baseChance: 5 },
-    
+
     // Common items (value 10-100)
     { text: 'goldfish 🐟', value: 50, baseChance: 18 },
     { text: 'guppy 🐠', value: 30, baseChance: 10 },
     { text: 'small trout 🐡', value: 60, baseChance: 12 },
     { text: 'catfish 🐈‍⬛', value: 25, baseChance: 9 },
-    
+
     // Uncommon items (value 100-200)
     { text: 'big salmon 🐠', value: 100, baseChance: 10 },
     { text: 'rare trout 🐡', value: 200, baseChance: 8 },
     { text: 'crab 🦀', value: 120, baseChance: 6 },
-    
+
     // Rare items (value 200-500)
     { text: 'mysterious sea shell 🐚', value: 150, baseChance: 5 },
     { text: 'shiny pearl 🦪', value: 250, baseChance: 3 },
@@ -31,15 +31,15 @@ const BASE_OUTCOMES = [
     { text: 'glowing jellyfish 🌟', value: 275, baseChance: 1.5 },
     { text: 'beautiful starfish 🌟', value: 350, baseChance: 1.2 },
     { text: 'lobster 🦞', value: 175, baseChance: 1.3 },
-    { text: 'magical fish 🐠✨', value: 500, baseChance: 1 },
-    
+    { text: 'magical fish 🐠✨', value: 500, baseChance: 1.2 },
+
     // Epic items (value 500-1000)
-    { text: 'golden trident 🔱', value: 750, baseChance: 0.5 },
-    { text: 'Kraken\'s eyeball 👁️', value: 1000, baseChance: 0.2 },
-    
+    { text: 'golden trident 🔱', value: 750, baseChance: 1 },
+    { text: 'Kraken\'s eyeball 👁️', value: 800, baseChance: 0.9 },
+
     // Legendary items (value 1000+)
-    { text: 'mythical mermaid scale 🧜‍♀️', value: 800, baseChance: 0.1 },
-    { text: 'Poseidon\'s lost crown 👑', value: 1200, baseChance: 0.05 }
+    { text: 'mythical mermaid scale 🧜‍♀️', value: 1000, baseChance: 0.4 },
+    { text: 'Poseidon\'s lost crown 👑', value: 1200, baseChance: 0.6 }
 ];
 
 const getRarityLabel = (value) => {
@@ -60,6 +60,15 @@ const getRarityColor = (value) => {
     return '#95a5a6';                    // Junk - Gray
 };
 
+function getCooldownTime(userData) {
+    const now = Date.now();
+    if (userData.buffs?.energyDrinkExpires && userData.buffs.energyDrinkExpires > now) {
+        // No cooldown if buff active
+        return 0;
+    }
+    return BASE_COOLDOWN;
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('fish')
@@ -70,21 +79,19 @@ module.exports = {
         const userData = getUser(userId);
         const now = Date.now();
 
+        const cooldownTime = getCooldownTime(userData);
         const lastFish = userData.cooldowns?.[COOLDOWN_KEY] || 0;
-        let cooldownTime = BASE_COOLDOWN;
+        const nextAvailableTime = lastFish + cooldownTime;
 
-        // Energy drink buff reduces cooldown by 30%
-        if (userData.buffs?.energyDrinkExpires > now) {
-            cooldownTime *= 0.7;
-        }
-
-        if (now < lastFish + cooldownTime) {
-            const timeLeft = Math.ceil((lastFish + cooldownTime - now) / 1000);
+        if (cooldownTime > 0 && now < nextAvailableTime) {
+            const timeLeft = Math.ceil((nextAvailableTime - now) / 1000);
+            console.log(`  On cooldown, time left: ${timeLeft}s`);
             return interaction.reply({
                 content: `🕒 You're tired from fishing! Try again in **${timeLeft}** seconds.`,
                 ephemeral: true
             });
         }
+        console.log('  Allowed to fish now!');
 
         if (!userData.equipment?.bait || userData.equipment.bait.count <= 0) {
             return interaction.reply("❌ You need bait to fish! Buy some from the shop.");
@@ -95,8 +102,10 @@ module.exports = {
             userData.equipment.bait.type = 'None';
         }
 
-        userData.cooldowns = userData.cooldowns || {};
-        userData.cooldowns[COOLDOWN_KEY] = now;
+        if (cooldownTime > 0) {
+            userData.cooldowns = userData.cooldowns || {};
+            userData.cooldowns[COOLDOWN_KEY] = now;
+        }
 
         const rodLevel = userData.equipment?.rod?.level || 1;
         const luckBoostActive = userData.buffs?.luckBoostExpires > now;
@@ -108,10 +117,18 @@ module.exports = {
                 chance *= (rodLevel === 2) ? 1.2 : 1.4;
             }
 
-            if (luckBoostActive && item.value > 100) {
-                chance *= 1.5;
+            if (luckBoostActive) {
+                if (item.value >= 200) {
+                    chance *= 1.7;  // big boost for rare+
+                } else if (item.value >= 100) {
+                    chance *= 1.3;  // moderate boost for uncommon
+                } else if (item.value < 10) {
+                    chance *= 0.5;  // reduce junk chance by half
+                } else {
+                    chance *= 1.0;  // reduction for common
+                }
             }
-            
+
             return { ...item, adjustedChance: chance };
         });
 
@@ -140,7 +157,7 @@ module.exports = {
         saveUser(userId, userData);
 
         const actualCatchChance = (catchResult.adjustedChance / totalChance) * 100;
-        
+
         const rarityLabel = getRarityLabel(catchResult.value);
         const rarityColor = getRarityColor(catchResult.value);
 

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getInventory, addMoney, saveUser, getUser } = require('../../structure/userData');
+const { getUser, saveUser, addMoney } = require('../../structure/userData');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,18 +22,18 @@ module.exports = {
     async execute(interaction) {
         const userId = interaction.user.id;
         const filter = interaction.options.getString('filter') || 'all';
-        const inventory = getInventory(userId);
 
-        if (!inventory || inventory.length === 0) {
+        const userData = getUser(userId);
+        if (!userData.inventory || userData.inventory.length === 0) {
             return interaction.reply({
                 content: "📦 Your inventory is empty. Go catch or collect some items first!",
                 ephemeral: true
             });
         }
 
-        let itemsToSell = inventory;
+        let itemsToSell = userData.inventory;
         if (filter !== 'all') {
-            itemsToSell = inventory.filter(item => 
+            itemsToSell = userData.inventory.filter(item =>
                 item.rarity.toLowerCase().includes(filter)
             );
         }
@@ -64,14 +64,14 @@ module.exports = {
         });
 
         const rarityOrder = [
-            'Legendary 💫', 
-            'Epic ✨', 
-            'Rare ⭐', 
-            'Uncommon 🔼', 
-            'Common 🔽', 
+            'Legendary 💫',
+            'Epic ✨',
+            'Rare ⭐',
+            'Uncommon 🔼',
+            'Common 🔽',
             'Junk 🗑️'
         ];
-        
+
         const sortedGroups = Object.values(itemGroups).sort((a, b) => {
             return rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
         });
@@ -99,21 +99,15 @@ module.exports = {
             .setFooter({ text: `Filter: ${filter === 'all' ? 'All Items' : filter.charAt(0).toUpperCase() + filter.slice(1)}` });
 
         if (filter === 'all') {
-            const userData = getUser(userId);
             userData.inventory = [];
-            saveUser(userId, userData);
         } else {
-            const newInventory = inventory.filter(item => 
+            userData.inventory = userData.inventory.filter(item => 
                 !item.rarity.toLowerCase().includes(filter)
             );
-            
-            const userData = getUser(userId);
-            userData.inventory = newInventory;
-            saveUser(userId, userData);
         }
-        
-        addMoney(userId, totalValue);
 
+        saveUser(userId, userData);
+        addMoney(userId, totalValue);
         await interaction.reply({ embeds: [embed] });
     }
 };

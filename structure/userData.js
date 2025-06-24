@@ -112,22 +112,4 @@ module.exports = {
         data[userId].cooldowns[key] = value;
         saveData(data);
     },
-
-    // INVENTORY FUNCTIONS
-    addToInventory(userId, item) {
-        const data = ensureUser(userId);
-        data[userId].inventory.push(item);
-        saveData(data);
-    },
-
-    getInventory(userId) {
-        const data = ensureUser(userId);
-        return data[userId].inventory;
-    },
-
-    clearInventory(userId) {
-        const data = ensureUser(userId);
-        data[userId].inventory = [];
-        saveData(data);
-    }
 };
