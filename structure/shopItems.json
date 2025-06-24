@@ -1,0 +1,63 @@
+{
+  "rod_basic": {
+    "name": "Basic Rod",
+    "type": "equipment",
+    "slot": "rod",
+    "price": 0,
+    "level": 1,
+    "emoji": "🎣",
+    "description": "A starter fishing rod"
+  },
+  "rod_reinforced": {
+    "name": "Reinforced Rod",
+    "type": "equipment",
+    "slot": "rod",
+    "price": 500,
+    "level": 2,
+    "emoji": "🎣",
+    "description": "More durable than the basic rod"
+  },
+  "rod_advanced": {
+    "name": "Advanced Rod",
+    "type": "equipment",
+    "slot": "rod",
+    "price": 1500,
+    "level": 3,
+    "emoji": "🎣",
+    "description": "Professional-grade fishing equipment"
+  },
+  "bait_worms": {
+    "name": "Worms",
+    "type": "bait",
+    "price": 50,
+    "quantity": 10,
+    "emoji": "🪱",
+    "description": "Basic bait that attracts common fish"
+  },
+  "bait_insects": {
+    "name": "Insects",
+    "type": "bait",
+    "price": 120,
+    "quantity": 30,
+    "emoji": "🦗",
+    "description": "Premium bait that attracts rare fish"
+  },
+  "buff_luck": {
+    "name": "Luck Potion",
+    "type": "buff",
+    "price": 300,
+    "durationMs": 3600000,
+    "emoji": "🍀",
+    "description": "Increases rare catch chance for 1 hour",
+    "effect": "rare catch chance"
+  },
+  "buff_energy": {
+    "name": "Energy Drink",
+    "type": "buff",
+    "price": 200,
+    "durationMs": 1800000,
+    "emoji": "⚡",
+    "description": "Reduces fishing cooldown for 30 minutes",
+    "effect": "fishing speed"
+  }
+}

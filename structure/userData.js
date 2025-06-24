@@ -5,7 +5,7 @@ const filePath = path.join(__dirname, '../data/user.json');
 // Make sure the data file exists, create empty JSON if not
 function ensureDataFile() {
     if (!fs.existsSync(filePath)) {
-        fs.mkdirSync(path.dirname(filePath), { recursive: true }); // ensure folder exists
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
         fs.writeFileSync(filePath, '{}', 'utf8');
     }
 }
@@ -17,7 +17,7 @@ function loadData() {
         return JSON.parse(raw);
     } catch (err) {
         console.error('Failed to read or parse user data file:', err);
-        return {}; // fallback to empty
+        return {};
     }
 }
 
@@ -47,11 +47,14 @@ function ensureUser(userId) {
                 luckBoostExpires: 0,
                 energyDrinkExpires: 0,
             },
-            inventory: []
+            inventory: [],
+            skills: {
+                mining: { level: 1, xp: 0 },
+                fishing: { level: 1, xp: 0 },
+                fighting: { level: 1, xp: 0 }
+            }
         };
-        saveData(data);
     } else {
-        // Defensive: add missing new properties for older users
         if (!data[userId].equipment) {
             data[userId].equipment = {
                 rod: { level: 1, name: 'Basic Rod' },
@@ -67,8 +70,16 @@ function ensureUser(userId) {
         if (!data[userId].inventory) {
             data[userId].inventory = [];
         }
-        saveData(data);
+        if (!data[userId].skills) {
+            data[userId].skills = {
+                mining: { level: 1, xp: 0 },
+                fishing: { level: 1, xp: 0 },
+                fighting: { level: 1, xp: 0 }
+            };
+        }
     }
+
+    saveData(data);
     return data;
 }
 
@@ -130,4 +141,31 @@ module.exports = {
         data[userId].cooldowns[key] = value;
         saveData(data);
     },
+
+    addSkillXP(userId, skill, xpAmount) {
+        const data = ensureUser(userId);
+        const user = data[userId];
+
+        if (!user.skills || !user.skills[skill]) {
+            console.warn(`Skill '${skill}' not found for user ${userId}`);
+            return;
+        }
+
+        const skillData = user.skills[skill];
+        skillData.xp += xpAmount;
+
+        const xpToLevel = skillData.level * 100;
+        if (skillData.xp >= xpToLevel) {
+            skillData.xp -= xpToLevel;
+            skillData.level++;
+            console.log(`🎉 ${skill} leveled up! Now level ${skillData.level}`);
+        }
+
+        saveData(data);
+    },
+
+    getSkill(userId, skill) {
+        const data = ensureUser(userId);
+        return data[userId].skills?.[skill] || { level: 1, xp: 0 };
+    }
 };

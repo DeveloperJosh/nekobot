@@ -1,17 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getUser, saveUser } = require('../../structure/userData');
-
-const SHOP_ITEMS = {
-    rod_basic: { name: 'Basic Rod', type: 'equipment', slot: 'rod', price: 0, emoji: '🎣', description: 'A starter fishing rod' },
-    rod_reinforced: { name: 'Reinforced Rod', type: 'equipment', slot: 'rod', price: 500, level: 2, emoji: '🎣', description: 'More durable than the basic rod' },
-    rod_advanced: { name: 'Advanced Rod', type: 'equipment', slot: 'rod', price: 1500, level: 3, emoji: '🎣', description: 'Professional-grade fishing equipment' },
-
-    bait_worms: { name: 'Worms', type: 'bait', price: 50, quantity: 10, emoji: '🪱', description: 'Basic bait that attracts common fish' },
-    bait_insects: { name: 'Insects', type: 'bait', price: 120, quantity: 30, emoji: '🦗', description: 'Premium bait that attracts rare fish' },
-
-    buff_luck: { name: 'Luck Potion', type: 'buff', price: 300, durationMs: 3600000, emoji: '🍀', description: 'Increases rare catch chance for 1 hour', effect: 'rare catch chance' },
-    buff_energy: { name: 'Energy Drink', type: 'buff', price: 200, durationMs: 1800000, emoji: '⚡', description: 'Reduces fishing cooldown for 30 minutes', effect: 'fishing speed' }
-};
+const SHOP_ITEMS = require('../../structure/shopItems.json');
 
 function formatPrice(price) {
     return `**$${price.toLocaleString()}**`;
@@ -103,6 +92,17 @@ module.exports = {
 
         if (item.type === 'equipment') {
             userData.equipment = userData.equipment || {};
+
+            // Check if user already has a rod and block downgrade or equal level purchase
+            const currentRod = userData.equipment.rod;
+            if (currentRod && currentRod.level >= (item.level || 1)) {
+                return interaction.reply({
+                    content: `❌ You already have a fishing rod of level ${currentRod.level} or higher. You can't downgrade or buy the same level rod.`,
+                    ephemeral: true
+                });
+            }
+
+            // Purchase allowed — equip new rod
             userData.equipment[item.slot] = {
                 level: item.level || 1,
                 name: item.name
@@ -150,7 +150,6 @@ module.exports = {
             userData.buffs = userData.buffs || {};
             const now = Date.now();
 
-            // Handle both buff types
             if (item.name === 'Luck Potion') {
                 userData.buffs.luckBoostExpires = now + item.durationMs;
             } else if (item.name === 'Energy Drink') {
