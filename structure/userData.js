@@ -2,13 +2,31 @@ const fs = require('fs');
 const path = require('path');
 const filePath = path.join(__dirname, '../data/user.json');
 
+// Make sure the data file exists, create empty JSON if not
+function ensureDataFile() {
+    if (!fs.existsSync(filePath)) {
+        fs.mkdirSync(path.dirname(filePath), { recursive: true }); // ensure folder exists
+        fs.writeFileSync(filePath, '{}', 'utf8');
+    }
+}
+
 function loadData() {
-    if (!fs.existsSync(filePath)) return {};
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    ensureDataFile();
+    try {
+        const raw = fs.readFileSync(filePath, 'utf8');
+        return JSON.parse(raw);
+    } catch (err) {
+        console.error('Failed to read or parse user data file:', err);
+        return {}; // fallback to empty
+    }
 }
 
 function saveData(data) {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    } catch (err) {
+        console.error('Failed to save user data file:', err);
+    }
 }
 
 function ensureUser(userId) {
