@@ -20,7 +20,7 @@ module.exports = {
         const user = getUser(userId);
 
         if (!user.job) {
-            return interaction.reply({ content: '❌ You need to have a job to work. Use /setjob to pick one.', ephemeral: true });
+            return interaction.reply({ content: '❌ You need to have a job to work. Use /job to pick one.', ephemeral: true });
         }
 
         const lastWork = getCooldown(userId, 'lastWork');
