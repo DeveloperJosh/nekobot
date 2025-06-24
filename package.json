@@ -18,13 +18,8 @@
     "canvas": "^2.10.2",
     "discord.js": "^14.15.3",
     "dotenv": "^16.0.3",
-    "gpt4all": "^4.0.0",
-    "llama-node": "^0.1.6",
-    "markov-chains-text": "^1.0.0",
-    "markov-strings": "^3.0.2",
     "moment": "^2.30.1",
-    "mongoose": "^8.5.1",
-    "play-dl": "^1.9.7"
+    "mongoose": "^8.5.1"
   },
   "devDependencies": {
     "@types/bun": "latest"
